@@ -1,0 +1,12 @@
+{
+	"id": "com.gailit.wemo.service",
+	"description": "Wemo Device Service",
+	"services": [ {
+		"name": "com.gailit.wemo.service",
+		"description": "Wemo Device Service",
+		"commands": [ { 
+			"name": "devices", 
+			"public": true
+		}] 
+	}]
+}

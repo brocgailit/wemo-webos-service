@@ -1,0 +1,14 @@
+{
+  "name": "com.gailit.wemo.service",
+  "version": "1.0.0",
+  "description": "Wemo Device Service",
+  "main": "device.service.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "BSD",
+  "dependencies": {
+    "wemo-client": "^0.10.0"
+  }
+}
