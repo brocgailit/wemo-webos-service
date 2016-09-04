@@ -12,8 +12,11 @@ var request = require('request-promise');
 var xml2js = Promise.promisifyAll(require('xml2js'));
 var xmlparser = new xml2js.Parser({explicitArray: false});
 var iptable = [];
+var devices = [];
 
 function addDevices(responses){
+
+	console.log('adding devices');
 
 	Promise.map(responses, function(response){
 
@@ -33,6 +36,7 @@ function addDevices(responses){
 }
 
 function addDevice(newDevice){
+	console.log('adding device');
 	if( devices.filter(function(device) { 
 		return device.macAddress === newDevice.macAddress; 
 	}).length > 0){
@@ -79,29 +83,30 @@ function toggleSwitch(macAddress){
 // Inital discovery
 //wemo.discover(foundDevice);
 
-nmap.scanAsync(opts).then(function(report){
-	
-	for (var item in report) {
-  		for( var host in report[item].host) {
-  			for(var port = 49150; port <= 49156; port++)
-  			iptable.push({ip: report[item].host[host].address[0].item.addr, port: port});
-  		}
-  	}
+function scanForDevices(){
+	nmap.scanAsync(opts).then(function(report){
+		
+		for (var item in report) {
+			for( var host in report[item].host) {
+				for(var port = 49150; port <= 49156; port++)
+				iptable.push({ip: report[item].host[host].address[0].item.addr, port: port});
+			}
+		}
 
-  	Promise.map(iptable, function(address){
-  		var url = 'http://'+address.ip+':'+address.port+'/setup.xml';
-  		return request({uri:url, resolveWithFullResponse: true}).catch( function(){ return false;} );
-  	}).then(function(response){
+		Promise.map(iptable, function(address){
+			var url = 'http://'+address.ip+':'+address.port+'/setup.xml';
+			return request({uri:url, resolveWithFullResponse: true}).catch( function(){ return false;} );
+		}).then(function(response){
+			addDevices(response.filter(function(result){ return result != false;}));
+		}).catch( function(e){}  )
 
-  		addDevices(response.filter(function(result){ return result != false;}));
-  	}).catch( function(e){}  )
-
-});
+	});
+}
 
 // a method that always returns the same value
 service.register("devices", function(message) {
 
-	wemo.discover(foundDevice);
+	scanForDevices();
 
 	if(message.payload.macAddress){
 		toggleSwitch(message.payload.macAddress);
